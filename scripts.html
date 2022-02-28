@@ -51,13 +51,83 @@
     
     <section class="box3">
         <h1 class="box3text">2021</h1>
-           <img src="pics/sc1.PNG" width="49%"/>
-           <img src="pics/sc2.PNG" width="49%"/>
-           <img src="pics/sc3.PNG" width="49%"/>
-           <img src="pics/sc4.PNG" width="49%"/>
-           <img src="pics/sc5.PNG" width="49%"/>
-           <img src="pics/sc6.PNG" width="49%"/>
-           <img src="pics/sc7.PNG" width="49%"/>
+           <div><p>
+             --[[ 
+The following script handles a door teleporter.
+When the player enter in the hitbox of the door (wich is about 30 studs), the doors open
+When the player touches the white part, he gets TPed to the linked teleporter.
+]]
+
+local TP1 = script.Parent
+
+
+local part = TP1.TP
+local hitbox = TP1.Hitbox
+
+local cool = false
+
+local doordb = true
+
+local TS = game:GetService("TweenService")
+local goal -- Linked Teleporter
+for _,v in ipairs(workspace:GetDescendants()) do
+	if v.Name == "TP2" and v.Parent.Parent.Name == "ConstruShop" then goal = v:WaitForChild("Goal") end
+end
+
+local GoalOpen = {CFrame = TP1.Door.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(-100), 0)}
+local GoalClose = {CFrame = TP1.Door.PrimaryPart.CFrame}
+
+function OpenDoor()
+	local TI = TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
+	TS:Create(TP1.Door.PrimaryPart, TI,  GoalOpen):Play()
+	wait(1)
+end
+function CloseDoor()
+	local TI = TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out)
+	TS:Create(TP1.Door.PrimaryPart, TI,  GoalClose):Play()
+	wait(1)
+end
+
+hitbox.Touched:Connect(function(hit)
+	if hit.Parent:FindFirstChild("Humanoid") then
+		if doordb then
+			doordb = false
+			local mag = (hitbox.Position - hit.Parent.PrimaryPart.Position).Magnitude
+			if mag < hitbox.Size.X*2 then
+				OpenDoor()
+			end
+			doordb = true
+		end
+	end
+end)
+
+hitbox.TouchEnded:Connect(function(hit)
+	if hit.Parent:FindFirstChild("Humanoid") then
+		if doordb then
+			doordb = false
+			CloseDoor()
+		end
+		doordb = true
+	end
+end)
+
+part.Touched:Connect(function(hit)
+	if not cool then
+		cool = true
+		if hit.Parent and hit.Parent:FindFirstChild('Humanoid') then
+			
+			local trans = game.Players:FindFirstChild(tostring(hit.Parent.Name)).PlayerGui:FindFirstChild('Trans')
+			TS:Create(trans.Frame, TweenInfo.new(1), {BackgroundTransparency = 0}):Play()
+			wait(1)
+			hit.Parent.PrimaryPart.Position = goal.Position
+			TS:Create(trans.Frame, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
+			
+		end
+		wait(3) cool = false
+	end
+
+                              end)</p></div>
+          
     </section>
 
     <script src="bootstrap.bundle.min.js"></script>
